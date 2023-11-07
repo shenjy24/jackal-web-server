@@ -12,7 +12,7 @@ docker build -t gameweb .
 
 2. 执行如下命令启动服务。
 ```
-docker run -d -p 18080:8080 -e TZ=Asia/Shanghai --name GameWeb -v /home/jonas/gameweb/logs:/logs 
+docker run -d -p 18088:8088 -e TZ=Asia/Shanghai --name GameWeb -v /home/jonas/gameweb/logs:/logs 
 -v /home/jonas/gameweb/conf/application.yml:/conf/application.yml gameweb
 ```
 - 通过挂载日志目录，使得可以在工作目录下的`logs`目录查看到服务日志。

@@ -1,4 +1,4 @@
-FROM java:17
+FROM openjdk:17-jdk-alpine
 VOLUME /tmp
 ADD web.jar /app.jar
 ADD conf /conf
