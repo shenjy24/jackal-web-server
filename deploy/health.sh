@@ -17,7 +17,7 @@ if [ -z "$CONTAINER_ID" ]; then
 fi
 
 # 获取容器的健康状态
-HEALTH=$(docker inspect --format='{{.State.Health.Status}}' $CONTAINER_ID)
+HEALTH=$(docker inspect --format='{{.State.Health.Status}}' "$CONTAINER_ID")
 
 # 如果容器健康状态不是"healthy"，则重启容器并发送通知
 if [ "$HEALTH" != "healthy" ]; then
