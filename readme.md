@@ -12,10 +12,10 @@ docker build -t gameweb .
 
 2. 执行如下命令启动服务。
 ```
-docker run -d -p 18088:8088 -e TZ=Asia/Shanghai --name GameWeb -v /home/jonas/gameweb/logs:/logs 
--v /home/jonas/gameweb/conf/application.yml:/conf/application.yml gameweb
+docker run -d -p 18088:8088 -e TZ=Asia/Shanghai --name GameWeb -v /home/jonas/gameweb/logs:/logs -v /home/jonas/gameweb/conf/application.yml:/conf/application.yml --link mysql gameweb
 ```
 - 通过挂载日志目录，使得可以在工作目录下的`logs`目录查看到服务日志。
+- 链接 mysql 容器，使用数据库连接时可使用 `jdbc:mysql://mysql:3306/web?useSSL=false&useUnicode=true&characterEncoding=UTF-8&serverTimezone=Hongkong&allowPublicKeyRetrieval=true`
 
 3. 服务器上测试端口
 ```
