@@ -9,7 +9,7 @@
 <configuration scan="true" scanPeriod="60 seconds" debug="false">
 
     <!-- 动态日志级别 -->
-<!--    <jmxConfigurator/>-->
+    <!--    <jmxConfigurator/>-->
 
     <!-- 定义日志文件 输出位置 -->
     <property name="log.log_dir" value="logs"/>
@@ -111,9 +111,10 @@
     </appender>
 
     <!--name包下的类的日志输出-->
-    <logger name="com.openfactor.smartkit" additivity="true" level="DEBUG">
+    <logger name="com.web" additivity="true" level="DEBUG">
         <appender-ref ref="ERROR"/>
         <appender-ref ref="INFO"/>
+        <appender-ref ref="app"/>
     </logger>
 
     <!-- root级别   DEBUG -->
