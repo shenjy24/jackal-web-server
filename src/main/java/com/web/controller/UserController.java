@@ -3,15 +3,16 @@ package com.web.controller;
 import com.web.config.access.Anonymous;
 import com.web.config.access.UserId;
 import com.web.repository.entity.UserEntity;
-import com.web.repository.qo.UserReq;
-import com.web.repository.vo.UserView;
+import com.web.repository.qo.UpdatePasswordQo;
+import com.web.repository.qo.UserQo;
+import com.web.repository.vo.UserVo;
 import com.web.service.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -35,7 +36,7 @@ public class UserController {
      */
     @Anonymous
     @PostMapping("/register")
-    public UserView register(@Valid UserReq req) {
+    public UserVo register(@Valid @RequestBody UserQo req) {
         UserEntity user = userService.register(req.getAccount(), req.getPassword());
         return userService.toUserView(user);
     }
@@ -48,7 +49,7 @@ public class UserController {
      */
     @Anonymous
     @PostMapping("/login")
-    public UserView login(UserReq req) {
+    public UserVo login(@Valid @RequestBody UserQo req) {
         UserEntity user = userService.login(req.getAccount(), req.getPassword());
         return userService.toUserView(user);
     }
@@ -57,8 +58,8 @@ public class UserController {
      * 退出登录
      */
     @PostMapping("/logoff")
-    public void logoff() {
-        userService.logoff();
+    public void logoff(@UserId Long userId) {
+        userService.logoff(userId);
     }
 
     /**
@@ -70,10 +71,9 @@ public class UserController {
      */
     @PostMapping("/updatePassword")
     public void updatePassword(@UserId Long userId,
-                               @RequestParam String newPassword,
-                               @RequestParam String oldPassword) {
-        userService.updatePassword(userId, newPassword, oldPassword);
-        userService.logoff();
+                               @Valid @RequestBody UpdatePasswordQo qo) {
+        userService.updatePassword(userId, qo.getNewPassword(), qo.getOldPassword());
+        userService.logoff(userId);
     }
 
     /**
@@ -83,7 +83,7 @@ public class UserController {
      * @return 用户信息
      */
     @PostMapping("/getUser")
-    public UserView getUser(@UserId Long userId) {
+    public UserVo getUser(@UserId Long userId) {
         UserEntity user = userService.getUser(userId);
         return userService.toUserView(user);
     }

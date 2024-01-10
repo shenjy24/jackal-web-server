@@ -295,4 +295,13 @@ public class DateUtil {
     public static int timestamp2int(Timestamp timestamp) {
         return (int) (timestamp.getTime() / 1000);
     }
+
+    /**
+     * 获取当前时间
+     *
+     * @return 当前时间
+     */
+    public static Timestamp getCurrentTime() {
+        return new Timestamp(System.currentTimeMillis());
+    }
 }

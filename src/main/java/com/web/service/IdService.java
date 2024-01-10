@@ -1,9 +1,9 @@
 package com.web.service;
 
-import com.web.config.GlobalConfig;
 import com.web.util.id.IdUtil;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -19,11 +19,15 @@ import java.util.UUID;
 public class IdService {
 
     private IdUtil idUtil;
-    private final GlobalConfig configItem;
+
+    @Value("${server.workerId}")
+    private int workerId;
+    @Value("${server.dataCenterId}")
+    private int dataCenterId;
 
     @PostConstruct
     public void init() {
-        idUtil = new IdUtil(configItem.getWorkerId(), configItem.getDataCenterId());
+        idUtil = new IdUtil(workerId, dataCenterId);
     }
 
     /**

@@ -1,6 +1,6 @@
 package com.web.config;
 
-import com.web.config.access.AuthInterceptor;
+import com.web.config.interceptor.AuthInterceptor;
 import com.web.config.access.UserArgResolver;
 import com.web.config.access.UserIdArgResolver;
 import com.web.config.interceptor.CrossOriginInterceptor;

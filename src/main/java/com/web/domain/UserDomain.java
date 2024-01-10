@@ -1,12 +1,17 @@
 package com.web.domain;
 
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.web.constant.YesNoEnum;
-import com.web.repository.dao.UserDao;
 import com.web.repository.entity.UserEntity;
-import com.web.service.IdService;
+import com.web.repository.entity.UserTokenEntity;
+import com.web.repository.mapper.UserMapper;
+import com.web.repository.mapper.UserTokenMapper;
+import com.web.util.DateUtil;
 import com.web.util.MD5Util;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
@@ -21,8 +26,8 @@ import java.sql.Timestamp;
 @Component
 @RequiredArgsConstructor
 public class UserDomain {
-    private final IdService idService;
-    private final UserDao userDao;
+    private final UserMapper userMapper;
+    private final UserTokenMapper userTokenMapper;
 
     /**
      * 根据用户ID获取用户实体信息
@@ -31,7 +36,10 @@ public class UserDomain {
      * @return 用户实体信息
      */
     public UserEntity getUser(Long userId) {
-        return userDao.findByUserIdAndUserStatus(userId, YesNoEnum.YES.getCode());
+        return new LambdaQueryChainWrapper<>(userMapper)
+                .eq(UserEntity::getUserId, userId)
+                .eq(UserEntity::getUserStatus, YesNoEnum.YES.getCode())
+                .one();
     }
 
     /**
@@ -41,7 +49,10 @@ public class UserDomain {
      * @return 用户实体信息
      */
     public UserEntity getUser(String account) {
-        return userDao.findByAccountAndUserStatus(account, YesNoEnum.YES.getCode());
+        return new LambdaQueryChainWrapper<>(userMapper)
+                .eq(UserEntity::getAccount, account)
+                .eq(UserEntity::getUserStatus, YesNoEnum.YES.getCode())
+                .one();
     }
 
     /**
@@ -53,7 +64,6 @@ public class UserDomain {
      */
     public UserEntity createUser(String account, String password) {
         UserEntity user = UserEntity.builder()
-                .userId(idService.objectId())
                 .userName(account)
                 .account(account)
                 .password(MD5Util.saltMd5(password))
@@ -61,7 +71,8 @@ public class UserDomain {
                 .createTime(new Timestamp(System.currentTimeMillis()))
                 .updateTime(new Timestamp(System.currentTimeMillis()))
                 .build();
-        return userDao.save(user);
+        userMapper.insert(user);
+        return user;
     }
 
     /**
@@ -69,8 +80,53 @@ public class UserDomain {
      *
      * @param user 用户
      */
-    public UserEntity updateUser(UserEntity user) {
+    public void updateUser(UserEntity user) {
         user.setUpdateTime(new Timestamp(System.currentTimeMillis()));
-        return userDao.saveAndFlush(user);
+        userMapper.updateById(user);
+    }
+
+    public UserTokenEntity getUserTokenByToken(String token) {
+        if (StringUtils.isBlank(token)) {
+            return null;
+        }
+        return new LambdaQueryChainWrapper<>(userTokenMapper)
+                .eq(UserTokenEntity::getToken, token)
+                .one();
+    }
+
+    public void saveUserToken(UserTokenEntity userToken) {
+        if (null == userToken) {
+            return;
+        }
+        userToken.setCreateTime(DateUtil.getCurrentTime());
+        userToken.setUpdateTime(DateUtil.getCurrentTime());
+        userTokenMapper.insert(userToken);
+    }
+
+    public void updateUserToken(UserTokenEntity userToken) {
+        if (null == userToken || null == userToken.getTokenId()) {
+            return;
+        }
+        userToken.setUpdateTime(DateUtil.getCurrentTime());
+        userTokenMapper.updateById(userToken);
+    }
+
+    public UserTokenEntity getUserTokenByUserId(Long userId) {
+        if (null == userId) {
+            return null;
+        }
+        return new LambdaQueryChainWrapper<>(userTokenMapper)
+                .eq(UserTokenEntity::getUserId, userId)
+                .one();
+    }
+
+    public void removeToken(Long userId) {
+        if (null == userId) {
+            return;
+        }
+        LambdaUpdateWrapper<UserTokenEntity> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.eq(UserTokenEntity::getUserId, userId);
+        wrapper.set(UserTokenEntity::getExpireTime, DateUtil.getCurrentTime());
+        userTokenMapper.update(wrapper);
     }
 }

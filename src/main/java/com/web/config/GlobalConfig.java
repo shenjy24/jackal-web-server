@@ -16,25 +16,5 @@ import java.util.List;
 public class GlobalConfig {
     @Value("${server.domain:}")
     private String serverDomain;
-    @Value("${server.workerId}")
-    private int workerId;
-    @Value("${server.dataCenterId}")
-    private int dataCenterId;
 
-    @Bean
-    public RestTemplate restTemplate() {
-        // 创建 RestTemplate
-        RestTemplate restTemplate = new RestTemplate();
-
-        // 获取 RestTemplate 中的 HttpMessageConverter 列表
-        List<HttpMessageConverter<?>> messageConverters = restTemplate.getMessageConverters();
-
-        // 设置字符集编码为 UTF-8
-        for (HttpMessageConverter<?> converter : messageConverters) {
-            if (converter instanceof StringHttpMessageConverter) {
-                ((StringHttpMessageConverter) converter).setDefaultCharset(StandardCharsets.UTF_8);
-            }
-        }
-        return restTemplate;
-    }
 }
