@@ -8,6 +8,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /home/jia/workspace/nginx/images:/jdd/images
+      - /home/jia/workspace/logs:/logs
     build:
       context: .
       dockerfile: Dockerfile
