@@ -1,27 +1,21 @@
 package com.web.repository.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.sql.Timestamp;
-
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity(name = "user")
-public class UserEntity {
-    @Id
+@TableName("user")
+public class UserEntity extends BaseEntity {
+    @TableId
     private Long userId;
     private String userName;
     private String userIcon;
     private String account;
     private String password;
     private Integer userStatus;
-    private Timestamp createTime;
-    private Timestamp updateTime;
 }

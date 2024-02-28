@@ -1,15 +1,16 @@
 package com.web.domain;
 
+import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.web.constant.YesNoEnum;
-import com.web.repository.dao.UserDao;
 import com.web.repository.entity.UserEntity;
-import com.web.service.IdService;
+import com.web.repository.entity.UserTokenEntity;
+import com.web.repository.mapper.UserMapper;
+import com.web.repository.mapper.UserTokenMapper;
 import com.web.util.MD5Util;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-
-import java.sql.Timestamp;
 
 /**
  * 用户域
@@ -21,8 +22,8 @@ import java.sql.Timestamp;
 @Component
 @RequiredArgsConstructor
 public class UserDomain {
-    private final IdService idService;
-    private final UserDao userDao;
+    private final UserMapper userMapper;
+    private final UserTokenMapper userTokenMapper;
 
     /**
      * 根据用户ID获取用户实体信息
@@ -31,7 +32,10 @@ public class UserDomain {
      * @return 用户实体信息
      */
     public UserEntity getUser(Long userId) {
-        return userDao.findByUserIdAndUserStatus(userId, YesNoEnum.YES.getCode());
+        if (null == userId) {
+            return null;
+        }
+        return userMapper.selectById(userId);
     }
 
     /**
@@ -41,7 +45,12 @@ public class UserDomain {
      * @return 用户实体信息
      */
     public UserEntity getUser(String account) {
-        return userDao.findByAccountAndUserStatus(account, YesNoEnum.YES.getCode());
+        if (StringUtils.isBlank(account)) {
+            return null;
+        }
+        return new LambdaQueryChainWrapper<>(userMapper)
+                .eq(UserEntity::getAccount, account)
+                .one();
     }
 
     /**
@@ -52,16 +61,13 @@ public class UserDomain {
      * @return 用户实体
      */
     public UserEntity createUser(String account, String password) {
-        UserEntity user = UserEntity.builder()
-                .userId(idService.objectId())
-                .userName(account)
-                .account(account)
-                .password(MD5Util.saltMd5(password))
-                .userStatus(YesNoEnum.YES.getCode())
-                .createTime(new Timestamp(System.currentTimeMillis()))
-                .updateTime(new Timestamp(System.currentTimeMillis()))
-                .build();
-        return userDao.save(user);
+        UserEntity user = new UserEntity()
+                .setUserName(account)
+                .setAccount(account)
+                .setPassword(MD5Util.saltMd5(password))
+                .setUserStatus(YesNoEnum.YES.getCode());
+        userMapper.insert(user);
+        return user;
     }
 
     /**
@@ -69,8 +75,42 @@ public class UserDomain {
      *
      * @param user 用户
      */
-    public UserEntity updateUser(UserEntity user) {
-        user.setUpdateTime(new Timestamp(System.currentTimeMillis()));
-        return userDao.saveAndFlush(user);
+    public void updateUser(UserEntity user) {
+        if (user == null || user.getUserId() == null) {
+            return;
+        }
+        userMapper.updateById(user);
+    }
+
+    public void saveUserToken(UserTokenEntity userToken) {
+        if (null == userToken) {
+            return;
+        }
+        userTokenMapper.insert(userToken);
+    }
+
+    public void updateUserToken(UserTokenEntity userToken) {
+        if (null == userToken || null == userToken.getTokenId()) {
+            return;
+        }
+        userTokenMapper.updateById(userToken);
+    }
+
+    public UserTokenEntity getUserTokenByToken(String token) {
+        if (StringUtils.isBlank(token)) {
+            return null;
+        }
+        return new LambdaQueryChainWrapper<>(userTokenMapper)
+                .eq(UserTokenEntity::getToken, token)
+                .one();
+    }
+
+    public UserTokenEntity getUserTokenByUserId(Long userId) {
+        if (null == userId) {
+            return null;
+        }
+        return new LambdaQueryChainWrapper<>(userTokenMapper)
+                .eq(UserTokenEntity::getUserId, userId)
+                .one();
     }
 }

@@ -111,9 +111,10 @@
     </appender>
 
     <!--name包下的类的日志输出-->
-    <logger name="com.openfactor.smartkit" additivity="true" level="DEBUG">
+    <logger name="com.web" additivity="true" level="INFO">
         <appender-ref ref="ERROR"/>
         <appender-ref ref="INFO"/>
+        <appender-ref ref="app"/>
     </logger>
 
     <!-- root级别   DEBUG -->
@@ -122,5 +123,6 @@
         <appender-ref ref="CONSOLE"/>
         <!-- 不管什么包下的日志都输出文件 -->
         <!--<appender-ref ref="ERROR"/>-->
+        <level value="INFO"/>
     </root>
 </configuration>

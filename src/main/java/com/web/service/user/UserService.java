@@ -1,16 +1,20 @@
 package com.web.service.user;
 
-import com.web.config.GlobalConfig;
 import com.web.config.response.BizException;
-import com.web.constant.CookieConstant;
 import com.web.constant.ErrorCode;
 import com.web.domain.UserDomain;
 import com.web.repository.entity.UserEntity;
-import com.web.repository.vo.UserView;
-import com.web.util.*;
+import com.web.repository.entity.UserTokenEntity;
+import com.web.service.AccessService;
+import com.web.util.DateUtil;
+import com.web.util.IdUtil;
+import com.web.util.MD5Util;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+
+import java.sql.Timestamp;
 
 /**
  * 用户服务
@@ -23,7 +27,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserService {
     private final UserDomain userDomain;
-    private final GlobalConfig configItem;
+    private final AccessService accessService;
 
     /**
      * 注册用户
@@ -56,19 +60,40 @@ public class UserService {
             throw new BizException(ErrorCode.USER_ERROR2);
         }
 
-        int expireTime = DateUtil.currentSecond() + CookieConstant.TOKEN_EXPIRED_TIME;
-        String token = TokenUtil.generateToken(user.getUserId(), expireTime);
-        CookieUtil.setCookie(ServletUtil.getResponse(), CookieConstant.COOKIE_KEY_TOKEN, token,
-                CookieConstant.TOKEN_EXPIRED_TIME, configItem.getServerDomain());
+        // 设置token
+        UserTokenEntity userToken = this.saveOrUpdateUserToken(user.getUserId());
+        // 设置Cookie
+        accessService.setCookie(userToken.getToken());
 
         return user;
+    }
+
+    public UserTokenEntity saveOrUpdateUserToken(Long userId) {
+        UserTokenEntity userToken = userDomain.getUserTokenByUserId(userId);
+        String token = IdUtil.uuid();
+        Timestamp expireTime = accessService.getTokenExpireTime();
+        if (null == userToken) {
+            userToken = new UserTokenEntity(userId, token, expireTime);
+            userDomain.saveUserToken(userToken);
+        } else {
+            userToken.setToken(token);
+            userToken.setExpireTime(expireTime);
+            userDomain.updateUserToken(userToken);
+        }
+        return userToken;
     }
 
     /**
      * 退出登录
      */
-    public void logoff() {
-        CookieUtil.removeCookie(ServletUtil.getResponse(), CookieConstant.COOKIE_KEY_TOKEN, configItem.getServerDomain());
+    public void logoff(Long userId) {
+        UserTokenEntity userToken = userDomain.getUserTokenByUserId(userId);
+        if (userToken == null) {
+            return;
+        }
+        userToken.setExpireTime(DateUtil.getCurrentTime());
+        userDomain.updateUserToken(userToken);
+        accessService.removeCookie();
     }
 
     /**
@@ -100,21 +125,17 @@ public class UserService {
         return userDomain.getUser(userId);
     }
 
-    /**
-     * 转换成返回结构
-     *
-     * @param user 用户实体
-     * @return 用户返回结构
-     */
-    public UserView toUserView(UserEntity user) {
-        if (null == user) {
-            return UserView.builder().build();
+    public UserTokenEntity getUserTokenByToken(String token) {
+        if (StringUtils.isBlank(token)) {
+            return null;
         }
-        return UserView.builder()
-                .userId(user.getUserId())
-                .userName(user.getUserName())
-                .userIcon(user.getUserIcon())
-                .account(user.getAccount())
-                .build();
+        return userDomain.getUserTokenByToken(token);
+    }
+
+    public void updateUserToken(UserTokenEntity userToken) {
+        if (null == userToken) {
+            return;
+        }
+        userDomain.updateUserToken(userToken);
     }
 }

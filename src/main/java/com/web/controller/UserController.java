@@ -3,16 +3,13 @@ package com.web.controller;
 import com.web.config.access.Anonymous;
 import com.web.config.access.UserId;
 import com.web.repository.entity.UserEntity;
-import com.web.repository.qo.UserReq;
+import com.web.repository.qo.UserQo;
 import com.web.repository.vo.UserView;
 import com.web.service.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 用户前端控制器
@@ -35,9 +32,9 @@ public class UserController {
      */
     @Anonymous
     @PostMapping("/register")
-    public UserView register(@Valid UserReq req) {
+    public UserView register(@Valid @RequestBody UserQo req) {
         UserEntity user = userService.register(req.getAccount(), req.getPassword());
-        return userService.toUserView(user);
+        return this.toUserView(user);
     }
 
     /**
@@ -48,17 +45,17 @@ public class UserController {
      */
     @Anonymous
     @PostMapping("/login")
-    public UserView login(UserReq req) {
+    public UserView login(@Valid @RequestBody UserQo req) {
         UserEntity user = userService.login(req.getAccount(), req.getPassword());
-        return userService.toUserView(user);
+        return this.toUserView(user);
     }
 
     /**
      * 退出登录
      */
     @PostMapping("/logoff")
-    public void logoff() {
-        userService.logoff();
+    public void logoff(@UserId Long userId) {
+        userService.logoff(userId);
     }
 
     /**
@@ -73,7 +70,7 @@ public class UserController {
                                @RequestParam String newPassword,
                                @RequestParam String oldPassword) {
         userService.updatePassword(userId, newPassword, oldPassword);
-        userService.logoff();
+        userService.logoff(userId);
     }
 
     /**
@@ -85,6 +82,23 @@ public class UserController {
     @PostMapping("/getUser")
     public UserView getUser(@UserId Long userId) {
         UserEntity user = userService.getUser(userId);
-        return userService.toUserView(user);
+        return this.toUserView(user);
+    }
+
+    /**
+     * 转换成返回结构
+     *
+     * @param user 用户实体
+     * @return 用户返回结构
+     */
+    private UserView toUserView(UserEntity user) {
+        if (null == user) {
+            return new UserView();
+        }
+        return new UserView()
+                .setUserId(user.getUserId())
+                .setUserName(user.getUserName())
+                .setUserIcon(user.getUserIcon())
+                .setAccount(user.getAccount());
     }
 }

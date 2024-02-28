@@ -1,5 +1,6 @@
-package com.web.config.access;
+package com.web.config.interceptor;
 
+import com.web.config.access.UserId;
 import com.web.constant.CookieConstant;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
@@ -10,13 +11,19 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
+/**
+ * 解析用户ID，以便注入参数
+ */
 @Component
-public class UserArgResolver implements HandlerMethodArgumentResolver {
+public class UserIdArgResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.getParameterType().isAssignableFrom(UserArg.class)
-                && parameter.hasParameterAnnotation(User.class);
+        if (!parameter.hasParameterAnnotation(UserId.class)) {
+            return false;
+        }
+        return parameter.getParameterType().isAssignableFrom(Long.class)
+                || parameter.getParameterType() == long.class;
     }
 
     @Override
@@ -25,8 +32,6 @@ public class UserArgResolver implements HandlerMethodArgumentResolver {
         if (userId == null) {
             throw new MissingServletRequestPartException(CookieConstant.REQ_ATT_USER);
         }
-        UserArg userArg = new UserArg();
-        userArg.setUserId(userId);
-        return userArg;
+        return userId;
     }
 }
