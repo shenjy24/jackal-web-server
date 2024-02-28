@@ -4,7 +4,7 @@ import com.web.config.access.Anonymous;
 import com.web.config.access.UserId;
 import com.web.repository.entity.UserEntity;
 import com.web.repository.qo.UserQo;
-import com.web.repository.vo.UserView;
+import com.web.repository.vo.UserVo;
 import com.web.service.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,7 @@ public class UserController {
      */
     @Anonymous
     @PostMapping("/register")
-    public UserView register(@Valid @RequestBody UserQo req) {
+    public UserVo register(@Valid @RequestBody UserQo req) {
         UserEntity user = userService.register(req.getAccount(), req.getPassword());
         return this.toUserView(user);
     }
@@ -45,7 +45,7 @@ public class UserController {
      */
     @Anonymous
     @PostMapping("/login")
-    public UserView login(@Valid @RequestBody UserQo req) {
+    public UserVo login(@Valid @RequestBody UserQo req) {
         UserEntity user = userService.login(req.getAccount(), req.getPassword());
         return this.toUserView(user);
     }
@@ -80,7 +80,7 @@ public class UserController {
      * @return 用户信息
      */
     @PostMapping("/getUser")
-    public UserView getUser(@UserId Long userId) {
+    public UserVo getUser(@UserId Long userId) {
         UserEntity user = userService.getUser(userId);
         return this.toUserView(user);
     }
@@ -91,11 +91,11 @@ public class UserController {
      * @param user 用户实体
      * @return 用户返回结构
      */
-    private UserView toUserView(UserEntity user) {
+    private UserVo toUserView(UserEntity user) {
         if (null == user) {
-            return new UserView();
+            return new UserVo();
         }
-        return new UserView()
+        return new UserVo()
                 .setUserId(user.getUserId())
                 .setUserName(user.getUserName())
                 .setUserIcon(user.getUserIcon())

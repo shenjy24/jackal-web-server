@@ -3,7 +3,7 @@ package com.web.repository.vo;
 import lombok.Data;
 
 @Data
-public class UserView {
+public class UserVo {
 
     /**
      * 用户id

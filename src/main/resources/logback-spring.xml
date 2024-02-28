@@ -9,7 +9,7 @@
 <configuration scan="true" scanPeriod="60 seconds" debug="false">
 
     <!-- 动态日志级别 -->
-<!--    <jmxConfigurator/>-->
+    <!--    <jmxConfigurator/>-->
 
     <!-- 定义日志文件 输出位置 -->
     <property name="log.log_dir" value="logs"/>

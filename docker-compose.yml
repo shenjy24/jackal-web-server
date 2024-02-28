@@ -1,0 +1,16 @@
+services:
+  jdd:
+    image: web-server
+    container_name: web-server
+    restart: always
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /home/jia/workspace/nginx/images:/jdd/images
+      - /home/jia/workspace/logs:/logs
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
