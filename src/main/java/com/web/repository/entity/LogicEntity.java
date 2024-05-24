@@ -6,7 +6,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * LogicEntity
+ * 逻辑删除实体
  *
  * @author shenjy
  * @time 2024/1/27 15:03

@@ -35,12 +35,14 @@ public class AuthInterceptor implements HandlerInterceptor {
             return true;
         }
         // 有Anonymous注解的方法可以匿名访问
-        if (accessService.hasAnnotation(handlerMethod, Anonymous.class)) {
-            return true;
-        }
+        boolean anonymous = accessService.hasAnnotation(handlerMethod, Anonymous.class);
         String token = CookieUtil.getToken(request);
-        if (StringUtils.isBlank(token)) {
+        if (StringUtils.isBlank(token) && !anonymous) {
             throw new BizException(SystemCode.NO_AUTH);
+        }
+
+        if (StringUtils.isBlank(token)) {
+            return true;
         }
 
         UserTokenEntity userToken = userService.getUserTokenByToken(token);
