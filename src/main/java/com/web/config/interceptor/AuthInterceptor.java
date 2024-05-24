@@ -6,7 +6,7 @@ import com.web.config.response.SystemCode;
 import com.web.constant.CookieConstant;
 import com.web.repository.entity.UserTokenEntity;
 import com.web.service.AccessService;
-import com.web.service.user.UserService;
+import com.web.service.UserService;
 import com.web.util.CookieUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

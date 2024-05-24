@@ -1,4 +1,4 @@
-package com.web.service.user;
+package com.web.service;
 
 import com.web.config.response.BizException;
 import com.web.constant.ErrorCode;

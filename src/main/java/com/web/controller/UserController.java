@@ -5,7 +5,7 @@ import com.web.config.access.UserId;
 import com.web.repository.entity.UserEntity;
 import com.web.repository.qo.UserQo;
 import com.web.repository.vo.UserVo;
-import com.web.service.user.UserService;
+import com.web.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;

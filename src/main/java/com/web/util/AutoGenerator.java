@@ -1,12 +1,13 @@
 package com.web.util;
 
 import com.baomidou.mybatisplus.generator.FastAutoGenerator;
-import com.baomidou.mybatisplus.generator.config.OutputFile;
+import com.baomidou.mybatisplus.generator.config.TemplateType;
 import com.baomidou.mybatisplus.generator.config.rules.DateType;
 import com.baomidou.mybatisplus.generator.engine.FreemarkerTemplateEngine;
+import com.web.repository.entity.BaseEntity;
+import org.apache.ibatis.annotations.Mapper;
 
 import java.nio.file.Paths;
-import java.util.Collections;
 
 /**
  * MyBatis Plus 自动实体代码生成器
@@ -21,28 +22,39 @@ public class AutoGenerator {
                 .globalConfig(builder -> {
                     builder.author("shenjy") // 设置作者
                             .outputDir(Paths.get(System.getProperty("user.dir")) + "/src/main/java")
-                            .dateType(DateType.SQL_PACK);
+                            .dateType(DateType.SQL_PACK)
+                            .disableOpenDir();
 
                 })
                 .packageConfig(builder -> {
                     builder.parent("com.web.repository")
                             .entity("entity")
-                            .mapper("mapper")
-                            .pathInfo(Collections.singletonMap(OutputFile.xml,
-                                    Paths.get(System.getProperty("user.dir")) + "/src/main/resource/mapper"));
+                            .mapper("mapper");
                 })
                 .strategyConfig(builder -> {
                     builder.addInclude("account_tbl")
                             .entityBuilder()
                             .enableLombok()
                             .enableTableFieldAnnotation()
+                            .superClass(BaseEntity.class)
+                            .disableSerialVersionUID()
                             .controllerBuilder()
-                            .enableRestStyle()
+                            .disable()
                             .serviceBuilder()
-                            .disableService()
-                            .disableServiceImpl();
+                            .disableServiceImpl()
+                            .mapperBuilder()
+                            .mapperAnnotation(Mapper.class)
+                            .disableMapperXml()
+                            .build();
                 })
-                .templateEngine(new FreemarkerTemplateEngine()) // 使用 Freemarker 模板引擎
+                .templateEngine(new FreemarkerTemplateEngine())
+                .templateConfig(builder ->
+                        builder.disable(TemplateType.CONTROLLER,
+                                        TemplateType.SERVICE,
+                                        TemplateType.SERVICE_IMPL,
+                                        TemplateType.XML)
+                                .build()
+                )
                 .execute(); // 执行生成
     }
 }
